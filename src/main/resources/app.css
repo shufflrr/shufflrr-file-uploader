@@ -1,0 +1,16 @@
+.vbox {
+    -fx-padding: 20;
+}
+
+.text-field {
+    -fx-pref-width: 300;
+}
+
+.label {
+    -fx-pref-width: 130;
+}
+
+.status {
+    -fx-font-weight: bold;
+    -fx-pref-width: 300;
+}
