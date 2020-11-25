@@ -3,9 +3,8 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 <VBox fx:controller="com.shufflrr.uploader.Controller" xmlns:fx="http://javafx.com/fxml" stylesheets="app.css"
       styleClass="vbox" spacing="10">
 
@@ -28,8 +27,8 @@
         <Label text="Path to folder"/>
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="BASELINE_LEFT" spacing="10">
-            <Button text="Browse" fx:id="chooser" style="-fx-pref-width: 80"/>
             <TextField fx:id="path" style="-fx-pref-width: 210"/>
+            <Button text="Browse" fx:id="chooser" style="-fx-pref-width: 80"/>
         </HBox>
     </HBox>
     <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 15 0">
@@ -39,13 +38,13 @@
     </HBox>
 
     <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 20 0">
-        <Label text="Status:"/>
+        <Label text="Status"/>
         <Label text="Pending..." fx:id="status" styleClass="status"/>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT" maxWidth="430">
-        <Button text="Upload" fx:id="submit" onAction="#upload"/>
+        <Label fx:id="copy" text="© 2020, Shufflrr LLC. All rights reserved." minWidth="300" style="-fx-font-style: italic"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label text="© 2020 Shufflrr" alignment="BASELINE_RIGHT"/>
+        <Button text="Upload" fx:id="submit" onAction="#upload"/>
     </HBox>
 </VBox>

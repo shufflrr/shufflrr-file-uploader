@@ -19,9 +19,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,6 +62,8 @@ public class Controller implements Initializable {
     Label status;
     @FXML
     Button submit;
+    @FXML
+    Label copy;
 
     void setStage(Stage stage) {
         this.stage = stage;
@@ -79,6 +83,10 @@ public class Controller implements Initializable {
             File file = dirChooser.showDialog(this.stage);
             this.path.setText(file.getAbsolutePath());
         });
+
+        this.copy.setText(String.format("© %s, Shufflrr LLC. All rights reserved.", Math.max(2020, LocalDate.now().getYear())));
+
+        this.target.setText("0");
     }
 
     @FXML
