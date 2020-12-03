@@ -5,6 +5,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ComboBox?>
 <VBox fx:controller="com.shufflrr.uploader.Controller" xmlns:fx="http://javafx.com/fxml" stylesheets="app.css"
       styleClass="vbox" spacing="10">
 
@@ -14,27 +17,31 @@
         <TextField fx:id="site" styleClass="text-field"/>
     </HBox>
     <HBox alignment="BASELINE_LEFT" maxWidth="430">
-        <Label text="Email address"/>
+        <Label text="Username"/>
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="email" styleClass="text-field"/>
     </HBox>
     <HBox alignment="BASELINE_LEFT" maxWidth="430">
         <Label text="Password"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <PasswordField fx:id="password" styleClass="text-field"/>
+        <HBox alignment="BASELINE_LEFT" spacing="10">
+            <PasswordField fx:id="password"  style="-fx-pref-width: 210"/>
+            <Button text="Login" fx:id="login" onAction="#login" prefWidth="430" style="-fx-pref-width: 80"/>
+        </HBox>
     </HBox>
+    <Separator maxWidth="430"/>
     <HBox alignment="BASELINE_LEFT" maxWidth="430">
-        <Label text="Path to folder"/>
+        <Label text="Local folder"/>
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="BASELINE_LEFT" spacing="10">
             <TextField fx:id="path" style="-fx-pref-width: 210"/>
             <Button text="Browse" fx:id="chooser" style="-fx-pref-width: 80"/>
         </HBox>
     </HBox>
-    <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 15 0">
-        <Label text="Shufflrr folder ID"/>
+    <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 20 0">
+        <Label text="Shufflrr folder"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <TextField fx:id="target" styleClass="text-field"/>
+        <ComboBox fx:id="target" styleClass="text-field"/>
     </HBox>
 
     <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 20 0">
@@ -42,9 +49,9 @@
         <Label text="Pending..." fx:id="status" styleClass="status"/>
     </HBox>
 
-    <HBox alignment="BASELINE_LEFT" maxWidth="430">
+    <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 20 0">
         <Label fx:id="copy" text="© 2020, Shufflrr LLC. All rights reserved." minWidth="300" style="-fx-font-style: italic"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Upload" fx:id="submit" onAction="#upload"/>
+        <Button text="Upload" fx:id="submit" onAction="#upload" style="-fx-pref-width: 80"/>
     </HBox>
 </VBox>

@@ -1,5 +1,8 @@
 package com.shufflrr.uploader;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -12,15 +15,18 @@ import com.shufflrr.sdk.Requests;
 import com.shufflrr.sdk.Shufflrr;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.input.InputEvent;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -44,7 +50,10 @@ import java.util.stream.StreamSupport;
 
 public class Controller implements Initializable {
     private static final int ROOT_FOLDER_ID = 0;
+    private static final String SITE_SUFFIX = ".shufflrr.com";
+    private static final int SITE_SUFFIX_LENGTH = SITE_SUFFIX.length();
     private Stage stage;
+    private Shufflrr conn;
 
     @FXML
     TextField site;
@@ -53,11 +62,13 @@ public class Controller implements Initializable {
     @FXML
     PasswordField password;
     @FXML
+    Button login;
+    @FXML
     Button chooser;
     @FXML
     TextField path;
     @FXML
-    TextField target;
+    ComboBox target;
     @FXML
     Label status;
     @FXML
@@ -71,12 +82,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.target.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                this.target.setText(oldValue);
-            }
-        });
-
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Open Resource Folder");
         this.chooser.setOnAction(e -> {
@@ -86,7 +91,68 @@ public class Controller implements Initializable {
 
         this.copy.setText(String.format("© %s, Shufflrr LLC. All rights reserved.", Math.max(2020, LocalDate.now().getYear())));
 
-        this.target.setText("0");
+        setDisableUpload(true);
+    }
+
+    private void setDisableLogin(boolean b) {
+        this.site.setDisable(b);
+        this.email.setDisable(b);
+        this.password.setDisable(b);
+        this.login.setDisable(b);
+    }
+
+    private void setDisableUpload(boolean b) {
+        this.chooser.setDisable(b);
+        this.path.setDisable(b);
+        this.target.setDisable(b);
+        this.submit.setDisable(b);
+    }
+
+    private List<Folder> formatFolders(Folder folder, int depth, List<Folder> acc) {
+        for (Folder f : folder.contents) {
+            f.setDepth(depth + 1);
+            acc.add(f);
+            formatFolders(f, depth + 1, acc);
+        }
+
+        return acc;
+    }
+
+    @FXML
+    private void login(ActionEvent event) {
+        String siteInput = this.site.getText();
+        String site = siteInput.endsWith(SITE_SUFFIX) ? siteInput.substring(0, siteInput.length() - SITE_SUFFIX_LENGTH) : siteInput;
+
+        Credentials creds = Credentials.builder()
+                .withSite(site)
+                .withUsername(this.email.getText())
+                .withPassword(this.password.getText())
+                .build();
+
+        Shufflrr conn = Shufflrr.connect(creds);
+
+        conn.sendAsync(Requests.ALL_FOLDERS, InTypes.NULL, OutTypes.NODE).thenApply(HttpResponse::body).thenAcceptAsync(opt -> {
+            opt.ifPresentOrElse(node -> {
+                Folder root = new ObjectMapper()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        .convertValue(node, Folder.class);
+                List<Folder> acc = new ArrayList<>();
+                acc.add(root);
+
+                List<Folder> list = formatFolders(root, 0, acc);
+                this.target.getItems().addAll(list);
+
+                Platform.runLater(() -> {
+                    this.setDisableLogin(true);
+                    this.setDisableUpload(false);
+                    setElementText(this.status, "Authenticated.", "#228b22");
+                });
+            }, () -> {
+                Platform.runLater(() -> setElementText(this.status, "Authentication error.", "#ee0000"));
+            });
+        }).join();
+
+        this.conn = conn;
     }
 
     @FXML
@@ -102,19 +168,11 @@ public class Controller implements Initializable {
             return;
         }
 
-        Credentials creds = Credentials.builder()
-                .withSite(this.site.getText())
-                .withUsername(this.email.getText())
-                .withPassword(this.password.getText())
-                .build();
-
-        Shufflrr conn = Shufflrr.connect(creds);
-
         conn.sendAsync(Requests.USER, InTypes.NULL, OutTypes.NODE).thenApply(HttpResponse::body).thenAcceptAsync(opt -> {
             opt.ifPresentOrElse(node -> {
                 var xportal = Lens.INTEGER.compose(Lens.TRAVERSE.apply("portalId"));
                 int portalId = xportal.apply(node);
-                getOrCreateFolder(conn, portalId, path.toFile().getName(), Integer.parseInt(this.target.getText())).thenAcceptAsync(id -> {
+                getOrCreateFolder(conn, portalId, path.toFile().getName(), ((Folder) this.target.getValue()).id).thenAcceptAsync(id -> {
                     recurseDirectories(conn, portalId, path, id);
                 });
                 Platform.runLater(() -> {
@@ -208,5 +266,40 @@ public class Controller implements Initializable {
     private static void setElementText(Labeled labeled, String text, String color) {
         labeled.setText(text);
         labeled.setTextFill(Paint.valueOf(color));
+    }
+
+    public static class Folder {
+        private final int id;
+        private final String name;
+        private final List<Folder> contents;
+        private int depth;
+
+        @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+        public Folder(@JsonProperty("id") int id, @JsonProperty("name") String name, @JsonProperty("contents") List<Folder> contents) {
+            this.id = id;
+            this.name = name == null ? "ROOT" : name;
+            this.contents = contents;
+        }
+
+        public int id() {
+            return this.id;
+        }
+
+        public String name() {
+            return this.name;
+        }
+
+        public List<Folder> contents() {
+            return this.contents;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
+
+        @Override
+        public String toString() {
+            return "-".repeat(this.depth * 2) + " " + this.name;
+        }
     }
 }

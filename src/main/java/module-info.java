@@ -4,6 +4,6 @@ module com.shufflrr.uploader {
     requires javafx.fxml;
     requires com.shufflrr.sdk;
 
-    exports com.shufflrr.uploader to javafx.fxml, javafx.graphics;
+    exports com.shufflrr.uploader to javafx.fxml, javafx.graphics, com.fasterxml.jackson.databind;
     opens com.shufflrr.uploader to javafx.fxml;
 }
