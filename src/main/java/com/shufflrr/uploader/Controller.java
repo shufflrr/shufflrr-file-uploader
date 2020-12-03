@@ -68,7 +68,7 @@ public class Controller implements Initializable {
     @FXML
     TextField path;
     @FXML
-    ComboBox target;
+    ComboBox<Folder> target;
     @FXML
     Label status;
     @FXML
@@ -139,8 +139,7 @@ public class Controller implements Initializable {
                 List<Folder> acc = new ArrayList<>();
                 acc.add(root);
 
-                List<Folder> list = formatFolders(root, 0, acc);
-                this.target.getItems().addAll(list);
+                this.target.getItems().addAll(formatFolders(root, 0, acc));
 
                 Platform.runLater(() -> {
                     this.setDisableLogin(true);
@@ -172,7 +171,7 @@ public class Controller implements Initializable {
             opt.ifPresentOrElse(node -> {
                 var xportal = Lens.INTEGER.compose(Lens.TRAVERSE.apply("portalId"));
                 int portalId = xportal.apply(node);
-                getOrCreateFolder(conn, portalId, path.toFile().getName(), ((Folder) this.target.getValue()).id).thenAcceptAsync(id -> {
+                getOrCreateFolder(conn, portalId, path.toFile().getName(), this.target.getValue().id).thenAcceptAsync(id -> {
                     recurseDirectories(conn, portalId, path, id);
                 });
                 Platform.runLater(() -> {
@@ -181,7 +180,8 @@ public class Controller implements Initializable {
                 });
             }, () -> {
                 Platform.runLater(() -> {
-                    this.submit.setDisable(false);
+                    setDisableUpload(true);
+                    setDisableLogin(false);
                     setElementText(this.status, "Authentication error.", "#ee0000");
                 });
             });

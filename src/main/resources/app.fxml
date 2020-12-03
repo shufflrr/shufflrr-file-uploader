@@ -21,7 +21,7 @@
         <Region HBox.hgrow="ALWAYS"/>
         <TextField fx:id="email" styleClass="text-field"/>
     </HBox>
-    <HBox alignment="BASELINE_LEFT" maxWidth="430">
+    <HBox alignment="BASELINE_LEFT" maxWidth="430" style="-fx-padding: 0 0 10 0">
         <Label text="Password"/>
         <Region HBox.hgrow="ALWAYS"/>
         <HBox alignment="BASELINE_LEFT" spacing="10">
@@ -29,7 +29,9 @@
             <Button text="Login" fx:id="login" onAction="#login" prefWidth="430" style="-fx-pref-width: 80"/>
         </HBox>
     </HBox>
-    <Separator maxWidth="430"/>
+
+    <Separator maxWidth="430" style="-fx-padding: 0 0 10 0"/>
+
     <HBox alignment="BASELINE_LEFT" maxWidth="430">
         <Label text="Local folder"/>
         <Region HBox.hgrow="ALWAYS"/>
